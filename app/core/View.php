@@ -4,8 +4,9 @@ namespace core;
 
 class View
 {
-    private $workingFolder;
-    private $templatesRoot = 'app/templates/';
+    private $working_folder;
+    private $templates_root = 'app/templates/';
+    private $layouts_folder;
     private $data = [];
 
     /**
@@ -13,9 +14,10 @@ class View
      * @param $workingFolder string
      */
 
-    public function __construct($workingFolder)
+    public function __construct($working_folder, $layouts_folder)
     {
-        $this->workingFolder = $this->templatesRoot.$workingFolder.'/';
+        $this->working_folder = $working_folder;
+        $this->layouts_folder = $layouts_folder;
     }
 
     /**
@@ -33,7 +35,9 @@ class View
      */
 
     public function get($name){
-        return $this->data[$name];
+        if(isset($this->data[$name])){
+            return $this->data[$name];
+        }
     }
 
     /**
@@ -41,36 +45,19 @@ class View
      * @param $template string
      */
 
-    public function render($template){
-        $view_file = $this->workingFolder.$template.".php";
+    public function render($template, $layout){
+        $view_file = $this->templates_root.$this->working_folder."/".$template.".php";
+        $layout_file = $this->templates_root.$this->layouts_folder."/".$layout.".php";
 
         extract($this->data);
 
         ob_start();
+        require_once ($layout_file);
         if (file_exists($view_file)) {
             require_once($view_file);
         }
-        $output = ob_get_contents();
-        ob_end_clean();
-        $output = $this->sanitize_output($output);
+        $output = ob_get_clean();
         echo $output;
-    }
-
-    /**
-     * clean from whitespaces
-     * @param $buffer
-     * @return mixed
-     */
-
-    private function sanitize_output($buffer) {
-        $search = array(
-            '/\>[^\S ]+/s',  // strip whitespaces after tags, except space
-            '/[^\S ]+\</s',  // strip whitespaces before tags, except space
-            '/(\s)+/s'       // shorten multiple whitespace sequences
-        );
-        $replace = array('>', '<', '\\1');
-        $buffer = preg_replace($search, $replace, $buffer);
-        return $buffer;
     }
 
 }

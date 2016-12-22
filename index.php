@@ -1,8 +1,12 @@
 <?php
+
+namespace core;
 echo hello;
 
-require_once("app/config.php");
+require_once("app/configs/config.php");
 
-Application::setConfig($settings);
+Config::set($settings);
 
 ?>
+
+

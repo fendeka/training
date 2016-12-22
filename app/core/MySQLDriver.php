@@ -2,49 +2,42 @@
 
 namespace core;
 
-use inter_face\DatabaseInterface;
+use interfaces\DatabaseInterface;
+use PDO;
+use PDOException;
+
 
 class MySQLDriver implements DatabaseInterface
 {
-    private $host;
-    private $user;
-    private $password;
-    private $name;
-    private $type;
-    protected $dbconnection;
 
-    /**
-     * MySQLDriver constructor.
-     */
+    protected $dbconnect;
 
     public function __construct()
     {
-        $this->setConfigs(Application::getConfig()['database']);
-        $this->connect();
+        $config = Config::getConfig('database');
+        $type = $config['type'];
+        $name = $config['name'];
+        $host = $config['host'];
+        $user = $config['user'];
+        $password = $config['password'];
+        $this->connect($type, $name, $host, $user, $password);
     }
 
-    /**
-     * @param $settings array
-     */
-
-    public function setConfigs($settings){
-        $this->host = $settings['host'];
-        $this->user = $settings['user'];
-        $this->password = $settings['password'];
-        $this->name = $settings['name'];
-        $this->type = $settings['type'];
-    }
 
     /**
      * @return \PDO
      */
 
-    public function connect()
+    public function connect($type, $name, $host, $user, $password)
     {
-        if(!$this->dbconnection){
-            $this->dbconnection = new \PDO($this->type . ":dbname=" . $this->name . ";host=" . $this->host, $this->user, $this->password);
+        try {
+            if (!$this->dbconnect) {
+                $this->dbconnect = new \PDO($type . ":dbname=" . $name . ";host=" . $host, $user, $password);
+                return $this->dbconnect;
+            }
+        }catch (PDOException $ex){
+            echo "DB connection error occured!";
         }
-        return $this->dbconnection;
     }
 
     /**
@@ -55,9 +48,15 @@ class MySQLDriver implements DatabaseInterface
 
     public function executeQuery($sql, $params = array())
     {
-        $response = $this->dbconnection->prepare($sql);
-        $response->execute();
-        return $response;
+        $pdo_statement = $this->dbconnect->prepare($sql);
+
+        for ($i =0; $i <= count($params); $i++){
+            $pdo_statement->bindValue($i+1, $params[$i]);
+        }
+
+        $pdo_statement->execute($params);
+        $rows = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
+        return $rows;
     }
 
     /**
@@ -66,7 +65,7 @@ class MySQLDriver implements DatabaseInterface
 
     public function disconnect()
     {
-        return $this->dbconnection = new \PDO();
+        return $this->dbconnect = null;
     }
 
 

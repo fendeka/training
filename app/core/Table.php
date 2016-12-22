@@ -5,146 +5,129 @@ namespace core;
 
 class Table
 {
-    protected $dbconnection;
     protected $use_table;
+    protected $db_connect;
 
-    protected $select;
-    protected $insert;
-    protected $delete;
-    protected $update;
-    protected $from;
-    protected $orderBy;
-    protected $where;
-    protected $limit;
 
-    /**
-     * Table constructor.
-     * @param $settings array
-     */
-
-    public function __construct($settings)
+    public function __construct($use_table)
     {
-        $this->dbconnection = new $settings['driver'](); //MySQLDriver
-        $this->dbconnection->connect($settings);
-        $this->use_table = 'training';
+        $config = Config::get('database');
+        $db_driver = $config['driver'];
+        $this->db_connect = $db_driver(); //MySQLDriver
+        $this->use_table = $use_table;
     }
 
-    /**
-     * @param null $field string
-     * @param null $params array
-     */
 
-    public function get($field = null, $params = null){
-        if($field === null && $params === null){
-            $this->select = $this->getAll();
+
+    public function get($columns = [], $where = []){
+
+        $sql_query = "SELECT ";
+        $params_array = [];
+
+        if(!empty($columns)){
+            $sql_query .= implode(', ', $columns);
         }else{
-            $this->select = "SELECT $field FROM $this->use_table . $this->where($params)";
+            $sql_query .= '*';
         }
+        $sql_query .= ' FROM '. $this->use_table;
+
+        if(!empty($where)){
+            $condition =[];
+            $condition_string = '';
+            foreach ($where as $key => $value){
+                $condition[] = $key ."=? ";
+                $condition_string .= implode('AND ', $condition);
+                $params_array[] = $value;
+            }
+
+            $sql_query .= " WHERE ". $condition_string;
+        }
+
+        return $this->db_connect->executeQuery($sql_query, $params_array);
+
     }
 
-    /**
-     * @param null $param string
-     * @return $this
-     */
+    public function getAll($columns = []){
 
-    public function getAll($param = null){
-        if($param === null){
-            $this->select = "SELECT * FROM $this->use_table";
+        $sql_query = "SELECT ";
+
+        if(!empty($columns)){
+            $sql_query .= implode(', ', $columns);
         }else{
-            $this->select = "SELECT $param FROM $this->use_table";
+            $sql_query .= '*';
         }
-        return $this;
+        $sql_query .= ' FROM '. $this->use_table;
+
+        return $this->db_connect->executeQuery($sql_query);
+
     }
 
-    /**
-     * @param $properties array
-     * @return $this
-     */
+    public function insert($data = []){
 
-    public function insert($properties){
-        $columns = "";
-        $values = "";
-        foreach ($properties as $key => $value){
-            $columns .= $key.", ";
-            $values .= "'".$value."', ";
+        $sql_query = "INSERT INTO ". $this->use_table;
+        $columns_string = '';
+        $values_string = '';
+        $params_array = [];
+
+        if(!empty($data)){
+            foreach ($data as $key => $value){
+                $columns_string .= $key.',';
+                $values[] = '?';
+                $values_string = implode(',', $values);
+                $params_array[] = $value;
+            }
         }
-        $columns = rtrim($columns, ", ");
-        $values = rtrim($values, ", ");
-        $this->insert = "INSERT INTO $this->use_table ($columns)VALUES ($values) ";
-        return $this;
+        $sql_query .= " (".$columns_string.") VALUES (".$values_string.")";
+
+        return $this->db_connect->executeQuery($sql_query, $params_array);
     }
 
-    /**
-     * @param $properties array
-     * @return $this
-     */
+    public function update($data = [], $where = []){
 
-    public function update($properties){
-        $property_string = "";
-        foreach ($properties as $key => $value){
-            $property_string .= $key."='".$value."', ";
+        $sql_query = "UPDATE $this->use_table SET"; //name=? WHERE id=?
+        $columns_string = '';
+        $condition_string = '';
+        $params_array = [];
+
+        if(!empty($data)){
+            foreach ($data as $key => $value){
+                $column[] = $key."=?";
+                $columns_string = implode(',', $column);
+                $params_array[] = $value;
+            }
+            $sql_query .= $columns_string;
         }
-        $property_string = rtrim($property_string, ", ");
-        $this->update = "UPDATE $this->use_table SET $property_string ";
-        return $this;
-    }
 
-    /**
-     * @return $this
-     */
+        if(!empty($where)){
+            $condition =[];
+            foreach ($where as $key => $value){
+                $condition[] = $key ."=? ";
+                $condition_string .= implode('AND ', $condition);
+                $params_array[] = $value;
+            }
 
-    public function from(){
-        $this->from = "FROM $this->use_table ";
-        return $this;
-    }
-
-    /**
-     * @param $param array
-     * @return $this
-     */
-
-    public function where($param){
-        $columns = "";
-        $values = "";
-        $property_string = "";
-        foreach ($param as $key => $value){
-            $columns .= $key."=";
-            $values .= "'".$value."', ";
-            $property_string .= $columns.$values;
+            $sql_query .= " WHERE ". $condition_string;
         }
-        $property_string = rtrim($property_string, ", ");
-        $this->where = " WHERE ".$property_string;
-        return $this;
+
+        return $this->db_connect->executeQuery($sql_query, $params_array);
     }
 
-    /**
-     * @param $position integer
-     * @param string $count
-     * @return $this
-     */
+    public function delete($where = []){
 
-    public function limit($position, $count=""){
-        $this->limit = "LIMIT ".$position;
-        if($count != ""){
-            $this->limit .= ", ".$count;
+        $sql_query = "DELETE FROM $this->use_table";
+        $condition_string = '';
+        if(!empty($where)){
+            $condition =[];
+            foreach ($where as $key => $value){
+                $condition[] = $key ."=? ";
+                $condition_string .= implode('AND ', $condition);
+                $params_array[] = $value;
+            }
+
+            $sql_query .= " WHERE ". $condition_string;
         }
-        return $this;
-    }
 
-    /**
-     * @return string
-     */
-
-    public function createQuery(){
-        $query = $this->select.$this->insert.$this->delete.$this->update.$this->from.$this->where.$this->orderBy.$this->limit;
-        $this->select = "";
-        $this->insert = "";
-        $this->delete = "";
-        $this->update = "";
-        $this->from = "";
-        $this->where = "";
-        $this->limit = "";
-        return $query;
+        return $this->db_connect->executeQuery($sql_query, $params_array);
     }
 
 }
