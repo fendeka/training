@@ -1,5 +1,6 @@
 <?php
-namespace core;
+namespace app\core;
+
 class Table
 {
     protected $use_table;
@@ -15,15 +16,16 @@ class Table
 
     private function where($where){
         $result = [];
+        $condition_string = '';
         if(!empty($where)){
             $condition =[];
             $result['condition_string'] = '';
             foreach ($where as $key => $value){
                 $condition[] = $key ."=? ";
-                $result['condition_string'] .= implode('AND ', $condition);
+                $condition_string .= implode('AND ', $condition);
                 $result['params_array'][] = $value;
             }
-            $result['condition_string'] = " WHERE ". $result['condition_string'];
+            $result['condition_string'] = " WHERE ". $condition_string;
 
             return $result;
         }
@@ -73,7 +75,6 @@ class Table
     public function update($data = [], $where = []){
         $sql_query = "UPDATE $this->use_table SET"; //name=? WHERE id=?
         $columns_string = '';
-        $condition_string = '';
         $params_array = [];
         if(!empty($data)){
             foreach ($data as $key => $value){
@@ -83,16 +84,9 @@ class Table
             }
             $sql_query .= $columns_string;
         }
-        if(!empty($where)){
-            $condition =[];
-            foreach ($where as $key => $value){
-                $condition[] = $key ."=? ";
-                $condition_string .= implode('AND ', $condition);
-                $params_array[] = $value;
-            }
-            $sql_query .= " WHERE ". $condition_string;
-        }
-        return $this->db_connect->executeQuery($sql_query, $params_array);
+        $result = $this->where($where);
+        $sql_query .= $result['condition_string'];
+        return $this->db_connect->executeQuery($sql_query, $result['params_array']);
     }
 
     public function delete($where = []){

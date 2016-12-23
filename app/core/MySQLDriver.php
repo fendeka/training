@@ -1,8 +1,8 @@
 <?php
 
-namespace core;
+namespace app\core;
 
-use interfaces\DatabaseInterface;
+use app\interfaces\DatabaseInterface;
 use PDO;
 use PDOException;
 
