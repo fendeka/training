@@ -15,12 +15,7 @@ class MySQLDriver implements DatabaseInterface
     public function __construct()
     {
         $config = Config::getConfig('database');
-        $type = $config['type'];
-        $name = $config['name'];
-        $host = $config['host'];
-        $user = $config['user'];
-        $password = $config['password'];
-        $this->connect($type, $name, $host, $user, $password);
+        $this->connect($config['type'], $config['name'], $config['host'], $config['user'], $config['password']);
     }
 
 
@@ -49,14 +44,16 @@ class MySQLDriver implements DatabaseInterface
     public function executeQuery($sql, $params = array())
     {
         $pdo_statement = $this->dbconnect->prepare($sql);
-
-        for ($i =0; $i <= count($params); $i++){
-            $pdo_statement->bindValue($i+1, $params[$i]);
+        if($pdo_statement){
+            for ($i = 0; $i <= count($params); $i++) {
+                $pdo_statement->bindValue($i + 1, $params[$i]);
+            }
+            $pdo_statement->execute($params);
+            $rows = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
+            return $rows;
         }
+       return false;
 
-        $pdo_statement->execute($params);
-        $rows = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
-        return $rows;
     }
 
     /**
