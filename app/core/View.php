@@ -6,16 +6,20 @@ class View
 {
     private $working_folder;
     private $templates_root = 'app/templates/';
+    private $layout_folder = 'layouts';
+    private $layout;
     private $data = [];
 
     /**
      * View constructor.
-     * @param $working_folder string
+     * @param $working_folder
+     * @param $layout
      */
 
-    public function __construct($working_folder)
+    public function __construct($working_folder, $layout)
     {
         $this->working_folder = $working_folder;
+        $this->layout = $layout;
     }
 
     /**
@@ -45,18 +49,18 @@ class View
 
     public function render($template){
         $view_file = $this->templates_root.$this->working_folder."/".$template.".php";
+        $layout_file = $this->templates_root.$this->layout_folder."/". $this->layout.".php";
 
         ob_start();
-
         ob_start();
         extract($this->data);
-        ob_end_flush();
-
         if (file_exists($view_file)) {
             require_once($view_file);
         }
         $output = ob_get_clean();
-        echo $output;
+
+        require_once($layout_file);
+        echo ob_get_clean();
     }
 
 }

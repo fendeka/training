@@ -10,29 +10,30 @@ use PDOException;
 class MySQLDriver implements DatabaseInterface
 {
 
-    protected $dbconnect;
+    private static $instance = null;
+    private $results;
 
     public function __construct()
     {
-        $config = Config::getConfig('database');
-        $this->connect($config['type'], $config['name'], $config['host'], $config['user'], $config['password']);
+        if(!isset(self::$instance)){
+            self::$instance = $this->connect();
+        }
+        return self::$instance;
     }
 
-
     /**
-     * @return \PDO
+     * @return PDO
      */
 
-    public function connect($type, $name, $host, $user, $password)
+    public function connect()
     {
+        $pdo = null;
         try {
-            if (!$this->dbconnect) {
-                $this->dbconnect = new \PDO($type . ":dbname=" . $name . ";host=" . $host, $user, $password);
-                return $this->dbconnect;
-            }
-        }catch (PDOException $ex){
-            echo "DB connection error occured!";
+            $pdo = new \PDO(Config::get('database/type') . ":dbname=" . Config::get('database/dbname') . ";host=" . Config::get('database/host'), Config::get('database/user'), Config::get('database/password'));
+        }catch (PDOException $e){
+            die($e->getMessage());
         }
+        return $pdo;
     }
 
     /**
@@ -43,15 +44,20 @@ class MySQLDriver implements DatabaseInterface
 
     public function executeQuery($sql, $params = array())
     {
-        $pdo_statement = $this->dbconnect->prepare($sql);
+        $pdo_statement = self::$instance->prepare($sql);
         if($pdo_statement){
-            for ($i = 0; $i <= count($params); $i++) {
-                $pdo_statement->bindValue($i + 1, $params[$i]);
+            if(count($params)) {
+                for ($i = 0; $i < count($params); $i++) {
+                    $pdo_statement->bindValue($i + 1, $params[$i]);
+                }
+                var_dump($pdo_statement);
             }
-            $pdo_statement->execute($params);
-            $rows = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
-            return $rows;
         }
+        if($pdo_statement->execute()) {
+            $this->results = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
+            return $this;
+        }
+
        return false;
 
     }
@@ -62,7 +68,7 @@ class MySQLDriver implements DatabaseInterface
 
     public function disconnect()
     {
-        return $this->dbconnect = null;
+        return self::$instance = null;
     }
 
 

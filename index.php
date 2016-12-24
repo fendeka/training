@@ -1,12 +1,8 @@
 <?php
 
 namespace app\core;
-echo hello;
 
-require_once("app/core/autoloader.php");
-
-Config::set($settings);
-
+require_once("app/configs/config.php");
 
 ?>
 
