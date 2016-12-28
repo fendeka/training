@@ -26,6 +26,7 @@ class Router
         $this->run();
     }
 
+
     public function run(){
         $controller_path = "app\\controllers\\" . ucfirst($this->controller).'Controller';
         $action_path = 'action' . ucfirst($this->action);
