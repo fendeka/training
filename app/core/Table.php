@@ -36,13 +36,14 @@ class Table
         $condition_string = implode(' AND ', $condition);
         $result['sql'] = "{$action} FROM {$this->use_table} WHERE $condition_string";
         $result['params'] = $values;
-        return $result;
+        $query_result = $this->db_connect->executeQuery($result['sql'], $result['params']);
+        return $query_result;
     }
 
     public function get($column = '*', $where = []){
         if(is_string($column)){
             $result = $this->action("SELECT {$column}", $where);
-            return $this->db_connect->executeQuery($result['sql'], $result['params']);
+            return $result;
         }else{
             return false;
         }
@@ -51,7 +52,8 @@ class Table
     public function getAll($column = '*'){
         if(is_string($column)){
             $sql_query = "SELECT {$column} FROM {$this->use_table}";
-            return $this->db_connect->executeQuery($sql_query);
+            $query_result = $this->db_connect->executeQuery($sql_query);
+            return $query_result;
         }else{
             return false;
         }
@@ -73,8 +75,8 @@ class Table
             }
         }
         $sql_query .= " (`".$columns_string."`) VALUES (".$values_string.")";
-        echo $sql_query;
-        return $this->db_connect->executeQuery($sql_query, $params_array);
+        $query_result = $this->db_connect->executeQuery($sql_query, $params_array);
+        return $query_result;
     }
 
     public function update($data = [], $where = []){
@@ -98,12 +100,12 @@ class Table
         }else{
             return false;
         }
-        return $this->db_connect->executeQuery($sql_query, $params_array);
+        $query_result = $this->db_connect->executeQuery($sql_query, $params_array);
+        return $query_result;
     }
 
     public function delete($where = []){
         $result = $this->action("DELETE ", $where);
-
-        return $this->db_connect->executeQuery($result['sql'], $result['params']);
+        return $result;
     }
 }
