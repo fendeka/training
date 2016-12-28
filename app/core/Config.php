@@ -6,10 +6,11 @@ namespace app\core;
 class Config
 {
     private static $config = [];
-    private static $autoloader;
 
     public function __construct()
     {
+        self::set(require_once "app/configs/config.php");
+
         spl_autoload_register(function ($class){
 
             $namespace = explode("\\", $class);
@@ -28,7 +29,6 @@ class Config
 
     public static function set($config){
         self::$config = $config;
-        self::$autoloader = new Config();
     }
 
     /**

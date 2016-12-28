@@ -1,8 +1,7 @@
 <?php
 
-require_once ('app/core/Config.php');
-
-$settings = array(
+return
+    $settings = array(
     'database' => array(
         'driver' => 'app\core\MySQLDriver',
         'host' => 'localhost',
@@ -17,6 +16,4 @@ $settings = array(
         'defaultErrorAction' => 'error',
     )
 );
-
-app\core\Config::set($settings);
 
