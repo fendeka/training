@@ -30,7 +30,7 @@ class Router
         $controller_path = "app\\controllers\\" . ucfirst($this->controller).'Controller';
         $action_path = 'action' . ucfirst($this->action);
 
-        if (!class_exists($controller_path) && !method_exists($controller_path, $action_path)){
+        if (!class_exists($controller_path) || !method_exists($controller_path, $action_path)){
             $controller_path = "app\\controllers\\" . ucfirst(Config::get('router/defaultController')) . 'Controller';
             $action_path = 'action' . ucfirst(Config::get('router/defaultErrorAction'));
             $this->controller = Config::get('router/defaultController');
