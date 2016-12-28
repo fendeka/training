@@ -6,10 +6,6 @@ use app\core\Controller;
 
 class PostController extends Controller
 {
-    public function __construct($params)
-    {
-        parent::__construct($params);
-    }
 
     public function actionCreate(){
 

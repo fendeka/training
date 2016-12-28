@@ -13,16 +13,22 @@ class Controller
     {
         $this->view = new View($controller);
         $this->params = $params;
+        $this->setModels($controller);
     }
 
     public function setModels($controller){
 
         if(!empty($this->uses)){
             foreach ($this->uses as $model){
-                $model_path = 'app\\models\\'.$model;
+                $model_path = 'app\\models\\' . $model;
                 if(class_exists($model_path)){
                     $this->{$model} = new $model_path;
                 }
+            }
+        }else{
+            $model_path = 'app\\models\\' . $controller;
+            if(class_exists($model_path)){
+                $this->{$controller} = new $model_path;
             }
         }
 

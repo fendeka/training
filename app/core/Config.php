@@ -9,6 +9,9 @@ class Config
 
     public function __construct()
     {
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+
         self::set(require_once "app/configs/config.php");
 
         spl_autoload_register(function ($class){

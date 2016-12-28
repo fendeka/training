@@ -7,11 +7,6 @@ use app\core\Controller;
 class UserController extends Controller
 {
 
-    public function __construct($params)
-    {
-        parent::__construct($params);
-    }
-
     public function actionRegister(){
 
     }
