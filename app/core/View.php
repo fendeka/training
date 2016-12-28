@@ -5,21 +5,19 @@ namespace app\core;
 class View
 {
     private $working_folder;
-    private $templates_root = 'app/templates/';
+    private $templates_root = 'templates/';
     private $layout_folder = 'layouts';
-    private $layout;
+    private $layout = 'default';
     private $data = [];
 
     /**
      * View constructor.
      * @param $working_folder
-     * @param $layout
      */
 
-    public function __construct($working_folder, $layout)
+    public function __construct($working_folder)
     {
         $this->working_folder = $working_folder;
-        $this->layout = $layout;
     }
 
     /**

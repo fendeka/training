@@ -8,18 +8,18 @@ class Config
     private static $config = [];
     private static $autoloader;
 
-    private function __construct()
+    public function __construct()
     {
-    spl_autoload_register(function ($class){
+        spl_autoload_register(function ($class){
 
-        $namespace = explode("\\", $class);
-        if(is_array($namespace)){
-            $classRoute = implode("/", $namespace).".php";
-        }
-        if(file_exists($classRoute)){
-            require_once $classRoute;
-        }
-    });
+            $namespace = explode("\\", $class);
+            if(is_array($namespace)){
+                $class_route = implode("/", $namespace).".php";
+            }
+            if(file_exists($class_route)){
+                require_once $class_route;
+            }
+        });
     }
 
     /**

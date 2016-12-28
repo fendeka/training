@@ -10,15 +10,13 @@ $settings = array(
         'password' => '1515',
         'dbname' => 'training',
         'type' => 'mysql'
+    ),
+    'router' => array(
+        'defaultController' => 'post',
+        'defaultAction' => 'index',
+        'defaultErrorAction' => 'error',
     )
 );
 
 app\core\Config::set($settings);
 
-
-
-
-
-
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
