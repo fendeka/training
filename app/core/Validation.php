@@ -5,50 +5,50 @@ namespace app\core;
 
 class Validation
 {
+    public static $validation_errors = [];
 
-    public static function min($field_name = '', $value = '', $rule_value = ''){
+    public static function min($field_name = '', $value = '', $rule_value = '', $model){
         if(strlen($value) < $rule_value){
-            return "{$field_name} must be at list {$rule_value} chars";
+            self::$validation_errors[$field_name] = "{$field_name} must be at list {$rule_value} chars";
         }
-        return false;
+        return true;
     }
 
-    public static function max($field_name = '', $value = '', $rule_value = ''){
+    public static function max($field_name = '', $value = '', $rule_value = '', $model){
         if(strlen($value) > $rule_value){
-            return "{$field_name} must be not longer then {$rule_value} chars";
+            self::$validation_errors[$field_name] = "{$field_name} must be not longer then {$rule_value} chars";
         }
-        return false;
+        return true;
     }
 
-    public static function unique($field_name = '', $value = '', $rule_value = ''){
+    public static function unique($field_name = '', $value = '', $rule_value = '', $model){
         if($rule_value){
-
-            return "this {$field_name} already exists";
+            if($model->find($field_name, [$field_name, '=', $value])){
+                self::$validation_errors[$field_name] = "this {$field_name} already exists";
+            }
         }
-
-        return false;
+        return true;
     }
 
-    public static function matches($field_name = '', $value = '', $rule_value = ''){
-        $rule_value = Input::get($rule_value);
-        if ($value != $rule_value) {
-            return "{$field_name} have to match";
+    public static function matches($field_name = '', $value = '', $rule_value = '', $model){
+        if ($value != Input::get($rule_value)) {
+            self::$validation_errors[$field_name] = "{$field_name} have to match";
         }
-        return false;
+        return true;
     }
 
-    public static function email($field_name = '', $value = '', $rule_value = ''){
+    public static function email($field_name = '', $value = '', $rule_value = '', $model){
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            return "{$field_name} have to be valid format";
+            self::$validation_errors[$field_name] = "{$field_name} have to be valid format";
         }
-        return false;
+        return true;
     }
 
-    public static function required($field_name = '', $value = false, $rule_value = ''){
+    public static function required($field_name = '', $value = false, $rule_value = '', $model){
         if(!$value){
-            return "{$field_name} is required";
+            self::$validation_errors[$field_name] = "{$field_name} is required";
         }
-        return false;
+        return true;
     }
 
 

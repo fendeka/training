@@ -50,7 +50,6 @@ class MySQLDriver implements DatabaseInterface
                 for ($i = 0; $i < count($params); $i++) {
                     $pdo_statement->bindValue($i + 1, $params[$i]);
                 }
-                var_dump($pdo_statement);
             }
         }
         if($pdo_statement->execute()) {

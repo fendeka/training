@@ -8,7 +8,7 @@ class Table
     protected $use_table;
     protected $db_connect;
 
-    public function __construct($use_table)
+    public function __construct($use_table = 'training')
     {
         $db_driver = Config::get('database/driver');
         $this->db_connect = new $db_driver(); //MySQLDriver
