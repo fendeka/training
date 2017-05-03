@@ -2,7 +2,6 @@
 
 namespace app\core;
 
-
 class Session
 {
     public static function init(){

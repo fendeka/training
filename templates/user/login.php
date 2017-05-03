@@ -1,20 +1,31 @@
 <?php
-echo 'login <br>';
+use app\core\Helper;
+use app\core\Input;
 ?>
 
-<form action="" method="post">
+<div class="row">
+    <form class="form-horizontal" method="POST" action="/user/login">
+        <div class="form-group">
+            <?php if (isset($errors)) :
+                echo Helper::showErrors($errors, 'login');
+            endif; ?>
+            <label for="login">Username or E-mail:</label>
+            <input class="form-control" id="login" type="text" name="login" value="<?=Input::input('login')?>">
+        </div>
 
-    <div class="input_field">
-        <label for="username">User Name:</label>
-        <input type="text" name="username" id="username" value="">
-    </div>
+        <div class="form-group">
+            <?php if (isset($errors)) :
+                echo Helper::showErrors($errors, 'password');
+            endif; ?>
+            <label for="password">Password:</label>
+            <input class="form-control" id="password" type="password" name="password">
+        </div>
 
-    <div class="input_field">
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" value="">
-    </div>
+        <div class="form-group">
+            <input class="btn btn-success" type="submit" value="Log In">
+        </div>
+    </form>
 
-    <input type="submit" value="Login">
-
-
-</form>
+    <a class="btn btn-primary" href="/user/register">Go to register!</a>
+    <a class="btn btn-primary" href="/task/create">New task</a>
+</div>

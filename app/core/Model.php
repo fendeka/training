@@ -20,20 +20,24 @@ class Model extends Table
                 }
             }
         }
-        $this->validation = empty(Validation::$validation_errors) ? true : Validation::$validation_errors;
+        $this->validation = empty(Validation::$validation_errors) ? false : Validation::$validation_errors;
+    }
+
+    public function getErrors()
+    {
+        return Validation::$validation_errors;
     }
 
     public function save($data= [], $where =[]){
         if(empty($where)){
-            $this->insert($data);
+            return $this->insert($data);
         }else{
-            $this->update($data, $where);
+            return $this->update($data, $where);
         }
-
     }
 
     public function deleteRecord($where){
-        $this->delete($where);
+        return $this->delete($where);
     }
 
     public function find($column = '*', $where =[]){
@@ -42,6 +46,11 @@ class Model extends Table
         }else{
             return $this->get($column, $where);
         }
+    }
+
+    public function findById($id)
+    {
+        return $this->get('*', ['id', '=', $id])[0];
     }
 
 

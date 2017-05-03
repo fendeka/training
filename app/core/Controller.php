@@ -11,13 +11,14 @@ class Controller
 
     public function __construct($controller, $params = [])
     {
+        Session::init();
         $this->view = new View($controller);
         $this->params = $params;
         $this->setModels($controller);
     }
 
-    public function setModels($controller){
-
+    public function setModels($controller)
+    {
         if(!empty($this->uses)){
             foreach ($this->uses as $model){
                 $model_path = 'app\\models\\' . $model;
@@ -34,11 +35,15 @@ class Controller
 
     }
 
-    public function set($name, $value){
+    public function set($name, $value)
+    {
         $this->view->set($name, $value);
     }
-    public function display($template){
+
+    public function display($template)
+    {
         $this->view->render($template);
     }
+
 
 }

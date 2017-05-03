@@ -8,11 +8,10 @@ class Table
     protected $use_table;
     protected $db_connect;
 
-    public function __construct($use_table = 'training')
+    public function __construct()
     {
         $db_driver = Config::get('database/driver');
         $this->db_connect = new $db_driver(); //MySQLDriver
-        $this->use_table = $use_table;
     }
 
     private function action($action, $where = null){
@@ -31,7 +30,6 @@ class Table
             } else {
                 return false;
             }
-
         }
         $condition_string = implode(' AND ', $condition);
         $result['sql'] = "{$action} FROM {$this->use_table} WHERE $condition_string";
@@ -49,10 +47,16 @@ class Table
         }
     }
 
-    public function getAll($column = '*'){
+    public function getAll($column = '*', $order_params = []){
         if(is_string($column)){
             $sql_query = "SELECT {$column} FROM {$this->use_table}";
-            $query_result = $this->db_connect->executeQuery($sql_query);
+            if(!empty($order_params)){
+                $sql_query.= " ORDER BY {$order_params['column']}  {$order_params['order']} LIMIT ?, ?";
+                unset($order_params['column']);
+                unset($order_params['order']);
+            }
+
+            $query_result = $this->db_connect->executeQuery($sql_query, $order_params);
             return $query_result;
         }else{
             return false;
@@ -75,8 +79,8 @@ class Table
             }
         }
         $sql_query .= " (`".$columns_string."`) VALUES (".$values_string.")";
-        $query_result = $this->db_connect->executeQuery($sql_query, $params_array);
-        return $query_result;
+        $this->db_connect->executeQuery($sql_query, $params_array);
+        return true;
     }
 
     public function update($data = [], $where = []){
@@ -92,20 +96,27 @@ class Table
             $columns_string = implode(',', $column);
             $sql_query .= $columns_string;
         }
-        if(!empty($where)){
-            foreach ($where as $key => $value){
-                $condition .= $key ."=". $value;
+        if(is_array($where)) {
+            $oparators = ['=', '<', '>', '>=', '<='];
+            if (count($where) === 3) {
+                $field = $where[0];
+                $oparator = $where[1];
+                $value = $where[2];
+                if (in_array($oparator, $oparators)) {
+                    $condition[] = $field . $oparator . $value;
+                }
+            } else {
+                return false;
             }
-            $sql_query .= " WHERE {$condition}";
-        }else{
-            return false;
         }
-        $query_result = $this->db_connect->executeQuery($sql_query, $params_array);
-        return $query_result;
+        $condition_string = implode(' AND ', $condition);
+        $sql_query .= " WHERE $condition_string";
+        $this->db_connect->executeQuery($sql_query, $params_array);
+        return true;
     }
 
     public function delete($where = []){
-        $result = $this->action("DELETE ", $where);
-        return $result;
+        $this->action("DELETE ", $where);
+        return true;
     }
 }

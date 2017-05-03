@@ -45,13 +45,15 @@ class MySQLDriver implements DatabaseInterface
     public function executeQuery($sql, $params = array())
     {
         $pdo_statement = self::$instance->prepare($sql);
+
         if($pdo_statement){
             if(count($params)) {
                 for ($i = 0; $i < count($params); $i++) {
-                    $pdo_statement->bindValue($i + 1, $params[$i]);
+                    $pdo_statement->bindValue($i + 1, $params[$i], PDO::PARAM_INT);
                 }
             }
         }
+
         if($pdo_statement->execute()) {
             $this->results = $pdo_statement->fetchAll(PDO::FETCH_ASSOC);
             return $this->results;

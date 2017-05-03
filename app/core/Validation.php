@@ -50,6 +50,4 @@ class Validation
         }
         return true;
     }
-
-
 }

@@ -2,10 +2,20 @@
 
 namespace app\models;
 
+use app\core\Config;
 use app\core\Model;
+use app\core\Input;
+use app\core\Helper;
+use app\core\Session;
+use app\core\Validation;
+
 
 class User extends Model
 {
+    protected $use_table = 'user';
+
+    public $is_logged = false;
+    public $id;
 
     public $scenario = [
         'login' => [
@@ -21,7 +31,7 @@ class User extends Model
             'username' => [
                 'required' => true,
                 'max' => 16,
-                'min' => 6,
+                'min' => 4,
                 'unique' => true,
             ],
             'email' => [
@@ -32,20 +42,30 @@ class User extends Model
             'password' => [
                 'required' => true,
                 'max' => 16,
-                'min' => 6,
+                'min' => 3,
                 'matches' => 'repeat_password',
             ]
         ]
 
     ];
 
-    public function toLogin(){
-        $this->validation_rules = $this->scenario['login'];
+    public function toLogin($login, $password)
+    {
+        $user = $this->find('*', ['username', '=', $login]);
+        if($user[0]['password'] == Helper::hash($password)){
+            $this->id = $user[0]['id'];
+            $this->is_logged = true;
+            return true;
+        }
     }
 
-    public function toRegister(){
-        $this->validation_rules = $this->scenario['register'];
+    public function toRegister()
+    {
+        return $this->insert([
+            'username' => Input::input('username'),
+            'email' => Input::input('email'),
+            'password' => Helper::hash(Input::input('password'))
+        ]);
     }
-
 
 }
